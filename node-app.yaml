@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-app
+spec:
+  selector:
+    matchLabels:
+      app: app
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - name: app
+        image: vijoyem/ecosiaimage:latest
+        imagePullPolicy: Always
+        ports:
+        - name: app
+          containerPort: 3000
+          protocol: TCP
+      imagePullSecrets:
+        - name: ecosiasecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-app-lb
+  labels:
+    app: app
+  annotations:
+    service.beta.kubernetes.io/oci-load-balancer-shape: "flexible"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-min: "10"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-max: "100"
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 3000
+  selector:
+    app: app
